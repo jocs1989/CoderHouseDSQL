@@ -1,4 +1,6 @@
 const fs = require("fs");
+const config = require('../config/config.js');
+const knex =require('knex');
 
 class Contenedora {
   constructor(nombre) {
@@ -8,63 +10,30 @@ class Contenedora {
 
   async save(object) {
     try {
-      const archivo = await fs.promises.readFile(this.nombre, "utf-8");
-      this.datos = [...JSON.parse(archivo)];
-      object.id = Number(await this.datos[this.datos.length - 1].id) + 1;
-      //object.id=await this.newID()
-      this.datos.push(object);
-      //await fs.promises.writeFile(this.nombre,JSON.stringify(this.datos,null,2))
-      fs.writeFileSync(this.nombre, JSON.stringify(this.datos, null, 2));
-      return this.datos[this.datos.length - 1];
+      const Knex = await knex(config)('articulos').insert(object);
+      
+      return await knex(config)('articulos').where(object).select('*')
     } catch (err) {
-      object.id = 1;
-      //await fs.promises.writeFile(this.nombre,JSON.stringify([object],null,2))
-      fs.writeFileSync(this.nombre, JSON.stringify([object], null, 2));
-      return object;
+      
+      throw new Error(err);
     }
   }
 
   async updateById(producto) {
     try {
-      const archivo = await fs.promises.readFile(this.nombre, "utf-8");
-      this.datos = [...JSON.parse(archivo)];
-      this.busqueda = this.datos.find((object) => {
-        if (object.id == producto.id) {
-          object.id = producto.id;
-          object.title = producto.title;
-          object.price = producto.price;
-          object.thumbnail = producto.thumbnail;
-
-          return object;
-        }
-      });
-      console.log(
-        `se acualizo el id:${this.busqueda.id} ::${this.busqueda.title}`
-      );
-      console.log(this.datos);
-      fs.writeFileSync(this.nombre, JSON.stringify(this.datos, null, 2));
-
-      return this.busqueda;
+      
+      
+      return await knex(config)('articulos').where(producto.id).update(producto);
     } catch (err) {
-      //object.id = 1;
-      //await fs.promises.writeFile(this.nombre,JSON.stringify([object],null,2))
-      //fs.writeFileSync(this.nombre, JSON.stringify([object], null, 2)) /
-      console.log(err);
+     
       throw new Error(err);
     }
   }
   async getById(id) {
     try {
-      const archivo = await fs.promises.readFile(this.nombre, "utf-8");
-      this.datos = [...JSON.parse(archivo)];
-      this.busqueda = this.datos.find((object) => {
-        if (object.id == id) {
-          return object;
-        }
-      });
-      console.log(this.busqueda === undefined ? null : this.busqueda);
+      
 
-      return this.busqueda === undefined ? null : this.busqueda;
+      return await knex(config)('articulos').where({id}).select('*');
     } catch (err) {
       //object.id = 1;
       //await fs.promises.writeFile(this.nombre,JSON.stringify([object],null,2))
@@ -74,19 +43,15 @@ class Contenedora {
     }
   }
 
-  idValidRandom(datos, key) {
+  async idValidRandom() {
     try {
       let i = Math.ceil(Math.random() * key);
-      console.log("i=" + i);
+      
 
-      let valid = datos.filter((object) => {
-        if (object.id === i) {
-          return object;
-        }
-      });
+      let valid = await this.getById(i)
 
-      if (valid === undefined) {
-        return this.idValidRandom(datos, key);
+      if (valid.id === undefined) {
+        return await this.idValidRandom();
       } else {
         return valid;
       }
@@ -98,17 +63,9 @@ class Contenedora {
 
   async getByIdRandom() {
     try {
-      const archivo = await fs.promises.readFile(this.nombre, "utf-8");
-      this.datos = [...JSON.parse(archivo)];
-      let key = this.datos[0].id;
+      
 
-      this.datos.find((object) => {
-        if (key <= object.id) {
-          key = object.id;
-        }
-      });
-
-      this.Random = this.idValidRandom(this.datos, key);
+      this.Random = this.idValidRandom();
 
       console.log(this.Random);
       return this.Random;
@@ -122,49 +79,25 @@ class Contenedora {
   }
 
   async getAll() {
-    let content = await fs.readFileSync(this.nombre, "utf8");
-    this.dataTxt = [...JSON.parse(content)];
-    return this.dataTxt;
-    console.log(this.dataTxt);
+    
+    return await knex(config)('articulos').select('*');
+    
   } // end  getAll
 
   async deleteById(id) {
     try {
-      const archivo = await fs.promises.readFile(this.nombre, "utf-8");
-      this.datos = [...JSON.parse(archivo)];
-      let sinEliminar = this.datos.filter((object) => {
-        if (id != object.id) {
-          return object;
-        }
-      });
-      let eliminado = this.datos.filter((object) => {
-        if (id == object.id) {
-          return object;
-        }
-      });
-
-      if (eliminado === undefined) {
-        console.log("No existe es id");
-      } else {
-        //await fs.promises.writeFile(this.nombre,JSON.stringify(eliminado,null,2))
-        fs.writeFileSync(this.nombre, JSON.stringify(sinEliminar, null, 2));
-        console.log(
-          `Eliminando...  id:${eliminado[0].id}::${eliminado[0].title}`
-        );
-      }
+      await knex(config)('articulos').where({id}).del();
     } catch (err) {
       throw new Error(err);
       //console.log(err)
     }
   } //end deleteById
 
-  deleteAll() {
+  async deleteAll() {
     try {
-      fs.writeFileSync(this.nombre, "[]", null, 2);
-      console.log("Elementos Eliminados");
+      await knex(config)('articulos').del();
     } catch (err) {
-      console.error(err);
-      return err;
+      throw new Error(err);
     }
   } //end deleteAll
 }
