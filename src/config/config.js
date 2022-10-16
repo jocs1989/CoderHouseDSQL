@@ -1,3 +1,5 @@
+//https://www.freemysqlhosting.net/register/?action=register
+//https://www.phpmyadmin.co/index.php?db=sql5526628&table=articulos&target=sql.php
 const config ={
     client: 'mysql',
     connection: {

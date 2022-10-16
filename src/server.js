@@ -4,8 +4,10 @@ const express = require("express");
 const { NONAME } = require("dns");
 const Contenedora = require(__dirname + "/routes/contenedora.js");
 const Integrante = require(__dirname + "/routes/integrante.js");
-const articulos = new Contenedora(__dirname + "/routes/articulos.txt");
+const articulos = new Contenedora();
 const dbchat =new Integrante(__dirname + "/routes/integrantes.txt")
+
+
 const { Server: HttpServer } = require('http');
 const { Server: IOServer } = require('socket.io');
 const chat = require(__dirname + "/routes/chat.js");
@@ -51,13 +53,12 @@ io.on('connection', (socket) => {
   console.log('Usuario conectado') 
     
   socket.on('agregar', async(data) => {
-    console.log(data)   
-    const valores=await articulos.getAll()
-    let idmax=valores[valores.length-1].id
-    data.id=idmax
-    valores.push(data)
-    console.log(valores)
-    io.sockets.emit('resultado', valores) 
+    
+    await articulos.getAll()
+    .then((datos =>io.sockets.emit('resultado',datos ) ))
+        
+    
+    
 })
 //chat
 

@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const router = Router(); //agrega la ruta del servidor
 const Contenedora = require(__dirname + "/contenedora.js");
-const articulos = new Contenedora(__dirname + "/articulos.txt");
+const articulos = new Contenedora();
 const bodyParser = require("body-parser");
 const urlencodedParser = bodyParser.urlencoded({ extended: true});
 const jsonParser = bodyParser.json();
@@ -60,7 +60,7 @@ router.get("/query:id", async (req, res) => {
 router.post("/", urlencodedParser,jsonParser, async (req, res) => {
 
   try {
-   console.log(req.body)
+   
     const producto = ({
       title: title,
       price: price,

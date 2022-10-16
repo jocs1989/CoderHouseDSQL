@@ -3,15 +3,10 @@
 const socket = io();
 
 function agregarProductos() {
-  const form = document.getElementById("formularios");
+  
 
-  form.addEventListener("submit", function (e) {
-    socket.emit("agregar", {
-      title: document.getElementById("title").value,
-      price: document.getElementById("price").value,
-      thumbnail: document.getElementById("thumbnail").value,
-    });
-  });
+    socket.emit("agregar",null );
+  
 }
 
 socket.on("resultado", (data) => {
@@ -41,7 +36,7 @@ function enviarMensaje() {
     mail: document.getElementById("chatname").value,
     fecha: fecha,
     msg: document.getElementById("textoChat").value,
-    year: year,
+    yyear: 2022,
   });
 }
 

@@ -1,10 +1,10 @@
-const fs = require("fs");
+
 const config = require('../config/config.js');
 const knex =require('knex');
 
 class Contenedora {
-  constructor(nombre) {
-    this.nombre = nombre;
+  constructor() {
+    
     this.datos = [];
   }
 
@@ -79,10 +79,12 @@ class Contenedora {
   }
 
   async getAll() {
-    
+    try {
     return await knex(config)('articulos').select('*');
+  } catch (err) {
+    throw new Error(err);
     
-  } // end  getAll
+  } }// end  getAll
 
   async deleteById(id) {
     try {
